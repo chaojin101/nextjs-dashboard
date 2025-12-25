@@ -10,22 +10,31 @@ export default function AdScript() {
       const now = Date.now();
       // Check if 10 seconds (10000ms) have passed
       if (now - lastTriggerTime.current >= 10000) {
+        // Prevent default action (navigation, etc.)
+        e.preventDefault();
+        // Stop propagation to prevent other handlers (optional, but good for "hijacking")
+        e.stopPropagation();
+
         lastTriggerTime.current = now;
 
-        const url =
+        const adUrl =
           "https://unequaledexchange.com/bZ3.Vn0sPn3WpOvhbwm/V/JUZ/DK0C2lNozJM/0DMODGI_zvLcTzYf3XMbz/QowFM/jNQh";
 
-        // Attempt to open pop-under
-        const newWindow = window.open(url, "_blank");
-        if (newWindow) {
-          // Try to blur the new window and focus the current one to keep user on the page
-          try {
-            newWindow.blur();
-            window.focus();
-          } catch (e) {
-            console.error("AdScript focus error:", e);
-          }
+        // Determine the content URL (destination)
+        // If clicked on a link, use its href. Otherwise, use current page URL.
+        let contentUrl = window.location.href;
+        const link = (e.target as HTMLElement).closest("a");
+        if (link && link.href) {
+          contentUrl = link.href;
         }
+
+        // 1. Open the content (destination) in a NEW tab.
+        // This becomes the active tab for the user.
+        window.open(contentUrl, "_blank");
+
+        // 2. Navigate the CURRENT tab to the Ad URL.
+        // This effectively "swaps" the current page with the ad, leaving it in the background/previous tab.
+        window.location.href = adUrl;
       }
     };
 
